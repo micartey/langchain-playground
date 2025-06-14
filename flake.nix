@@ -1,5 +1,5 @@
 {
-  description = "karl-the-voice-assistant";
+  description = "langchain-rag";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
