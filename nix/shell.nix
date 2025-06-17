@@ -15,6 +15,6 @@ pkgs.mkShell rec {
 
 
     python -m venv .venv
-    source .venv/bin/activate; pip install langchain langchain_community langchain_experimental ollama tqdm unstructured chromadb
+    source .venv/bin/activate; pip install langchain langchain_community langchain_experimental langchain-ollama langchain-chroma tqdm unstructured
   '';
 }
