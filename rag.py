@@ -19,8 +19,6 @@ documents = loader.load()
 text_splitter = SemanticChunker(embeddings) # or e.g. RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
 texts = text_splitter.split_documents(documents)
 
-print(texts)
-
 # print(texts)
 
 # 3. Create an in-memory vector store
@@ -31,8 +29,8 @@ docsearch = Chroma(
 )
 
 # From what I can tell, as soon as we add an id, we will not add data, but override data
-# So that means the database doesn't increase in size anymore.
-# Hoever: Using the source might be unique to the DirectoryLoader, other loaders might have other metadata
+# So that means the database doesn't increase in size every run anymore.
+# However: Using the source might be unique to the DirectoryLoader, other loaders might have other metadata
 for doc in texts:
     doc.id = doc.metadata['source']
 
