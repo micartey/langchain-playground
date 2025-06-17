@@ -19,21 +19,24 @@ documents = loader.load()
 text_splitter = SemanticChunker(embeddings) # or e.g. RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
 texts = text_splitter.split_documents(documents)
 
+print(texts)
+
 # print(texts)
 
 # 3. Create an in-memory vector store
-docsearch = Chroma.from_documents(
-    documents=texts,
-    embedding=embeddings,
+docsearch = Chroma(
+    collection_name="test_collection",
+    embedding_function=embeddings,
     persist_directory=".chromadb"
 )
 
-# TODO: Retrive from file system if we want to use already stored data
-#
-# docsearch = Chroma(
-#     embedding_function=embeddings,
-#     persist_directory=".chromadb"
-# )
+# From what I can tell, as soon as we add an id, we will not add data, but override data
+# So that means the database doesn't increase in size anymore.
+# Hoever: Using the source might be unique to the DirectoryLoader, other loaders might have other metadata
+for doc in texts:
+    doc.id = doc.metadata['source']
+
+docsearch.add_documents(texts) # <-- Comment this out to use only already stored data
 
 # 4. Custom prompt
 prompt = PromptTemplate(
