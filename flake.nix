@@ -2,7 +2,7 @@
   description = "langchain-rag";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     utils.url = "github:numtide/flake-utils";
   };
 

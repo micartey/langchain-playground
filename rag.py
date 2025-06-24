@@ -37,7 +37,9 @@ prompt = PromptTemplate(
 qa = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
-    retriever=docsearch.as_retriever(),
+    retriever=docsearch.as_retriever(
+        search_kwargs={"k": 2} # By default it tries to get 4 results
+    ),
     chain_type_kwargs={"prompt": prompt}
 )
 
