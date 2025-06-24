@@ -10,6 +10,8 @@ in
 pkgs.mkShell rec {
   buildInputs = with pkgs; [
     gcc
+    just
+
     python312
     python312Packages.pip
     python312Packages.numpy
