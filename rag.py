@@ -6,7 +6,7 @@ from langchain.prompts import PromptTemplate
 import sys
 
 # 1. Initialize Ollama models
-llm = OllamaLLM(model="llama2")
+llm = OllamaLLM(model="llama2", temperature = 0)
 embeddings = OllamaEmbeddings(model="mxbai-embed-large")
 
 # 2. Load in-memory vector store

@@ -7,13 +7,15 @@ from langchain_chroma import Chroma
 llm = OllamaLLM(model="llama2")
 embeddings = OllamaEmbeddings(model="mxbai-embed-large")
 
+print("Reading files from directory and splitting...")
+
 # 2. Load and split documents
 loader = DirectoryLoader('./docs/', glob="**/*.txt") # or e.g. WebBaseLoader(url)
 documents = loader.load()
 text_splitter = SemanticChunker(embeddings) # or e.g. RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
 texts = text_splitter.split_documents(documents)
 
-# print(texts)
+print("Storing to db...")
 
 # 3. Create an in-memory vector store
 docsearch = Chroma(
@@ -29,3 +31,5 @@ for doc in texts:
     doc.id = doc.metadata['source']
 
 docsearch.add_documents(texts) # <-- Comment this out to use only already stored data
+
+print("Done")
