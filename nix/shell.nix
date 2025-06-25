@@ -4,7 +4,8 @@
 
 let
   langchain-experimental = pkgs.callPackage ../pypi/langchain-experimental.nix {
-    pkgs = pkgs; # This is shit
+    python = pkgs.python312;
+    pkgs = pkgs;
   };
 in
 pkgs.mkShell rec {

@@ -1,6 +1,6 @@
-{ pkgs, ... }:
+{ pkgs, python, ... }:
 
-pkgs.python312.pkgs.buildPythonPackage rec {
+python.pkgs.buildPythonPackage rec {
   pname = "langchain_experimental";
   version = "0.3.4";
   format = "pyproject";
@@ -11,12 +11,12 @@ pkgs.python312.pkgs.buildPythonPackage rec {
   };
 
   # Build-time dependencies
-  nativeBuildInputs = with pkgs.python312.pkgs; [
+  nativeBuildInputs = with python.pkgs; [
     poetry-core
   ];
 
   # Runtime dependencies
-  propagatedBuildInputs = with pkgs.python312Packages; [
+  propagatedBuildInputs = with python.pkgs; [
     langchain
     langchain-core
     langchain-community
