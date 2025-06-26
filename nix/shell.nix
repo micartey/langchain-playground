@@ -37,6 +37,8 @@ pkgs.mkShell rec {
     python312Packages.matplotlib
   ];
 
+  USER_AGENT = "Firefox/11.0.1"; # Probably doesn't even exist
+
   shellHook = ''
     export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath buildInputs}
   '';

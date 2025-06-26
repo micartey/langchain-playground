@@ -1,17 +1,16 @@
 from langchain_community.document_loaders import WebBaseLoader
+from langchain_core.messages import HumanMessage
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.vectorstores import InMemoryVectorStore
-from langchain.tools.retriever import create_retriever_tool
 from langchain_ollama import OllamaLLM, OllamaEmbeddings
 from langgraph.graph import StateGraph, MessagesState, START, END
-from langgraph.prebuilt import ToolNode, tools_condition
+from langchain.chains import RetrievalQA
 
+# Initialize LLM and embeddings
 llm = OllamaLLM(model="llama2")
 embeddings = OllamaEmbeddings(model="mxbai-embed-large")
 
-# 1. We create a vectorstore from scraped documents
-
-# 1.1 Scrape DFKI Websites (I just picked two projects from the DFKI News)
+# 1. URLs for "knowledge"
 urls = [
     "https://www.dfki.de/web/news/effizienteres-recycling-dank-ki",
     "https://www.dfki.de/web/news/grenzueberschreitende-quantenkraft-projekt-upquantval",
@@ -20,82 +19,121 @@ urls = [
 docs = [WebBaseLoader(url).load() for url in urls]
 docs_list = [item for sublist in docs for item in sublist]
 
-# 1.2 Split Documents into Chunks
+# 2 Split Documents into Chunks
 text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
     chunk_size=300,
     chunk_overlap=50
 )
 
 doc_splits = text_splitter.split_documents(docs_list)
-# 1.3 Embed Chunks and save to vectorstore
+
+# 3 Embed Chunks and save to vectorstore
 vectorstore = InMemoryVectorStore.from_documents(
     documents=doc_splits,
     embedding=embeddings
 )
 
-# 1.4 Create Retriever Tool for use in LangGraph agents
-retriever = vectorstore.as_retriever()
-
-retriever_tool = create_retriever_tool(
-    retriever,
-    "retrieve_dfki_projects",
-    "Search for information about DFKI projects.",
-)
-
-def decide_action(messages):
+def get_human_message(state):
     """
-    Decide whether to retrieve information or answer directly.
+    Get the last user prompt
     """
-    print("I shall decide the path!")
-    print(messages)
 
-    # Example logic: Check if the message contains a keyword indicating retrieval
-    # print(messages['messages'][-1]["content"])
-    user_message = messages['messages'][-1].content
-    if "DFKI" in user_message or "project" in user_message:
-        return "tools"  # Indicating retrieval
+    messages = state["messages"]
+    last_message = messages[-1]
 
-    return END
+    # Get the content of the message
+    if isinstance(last_message, HumanMessage):
+        content = last_message.content
+    elif isinstance(last_message, dict) and "content" in last_message:
+        content = last_message["content"]
+    else:
+        content = str(last_message)
 
-def respond(state):
-    return {"messages": [llm.invoke(state["messages"])]}
+    return content
 
-# Use the state you created here
+# Define the agent nodes and functions
+def should_use_tools(state):
+    """
+    Determine whether to use tools or not based on the query.
+    Returns a string key for routing.
+
+    This is so goddamn stupid... I am ashamed
+    """
+
+    content = get_human_message(state)
+
+    # Check if we need to retrieve information from the DFKI projects
+    if "DFKI" in content or "project" in content:
+        print("Will use retrieval tool")
+        return "tools"
+
+    print("No retrieval needed, responding directly")
+    return "default"
+
+def generate_response(state):
+    """
+    Generate a response using the LLM.
+    """
+    # print("State in generate_response:", state)
+
+    response = llm.invoke(state['messages']) # <-- Why do I even need to do this on my own?!
+
+    assistant_message = {"role": "assistant", "content": response}
+    return {"messages": state["messages"] + [assistant_message]}
+
+def retrive_dfki_projects(state):
+    """
+    Not quite a tool
+    """
+
+    print("Getting context from RAG system")
+
+    qa = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=vectorstore.as_retriever(),
+        # chain_type_kwargs={"prompt": prompt} # Ignore the prompt atm
+    )
+
+    response = qa.invoke(get_human_message(state))
+    assistant_message = {"role": "tool", "tool_call_id": "-1", "content": response}
+    return {"messages": state["messages"] + [assistant_message]}
+
+
+# 4. Create the graph
 workflow = StateGraph(MessagesState)
+workflow.add_node("retrive_dfki_projects", retrive_dfki_projects)
+workflow.add_node("generate", generate_response)
 
-# Create the nodes for your graph, these are the functions that will be called in the graph
-workflow.add_node("generate_query_or_respond", ToolNode([decide_action]))
-workflow.add_node("retrieve", ToolNode([retriever_tool]))
-workflow.add_node("respond", respond)
-
-# Create the edges for your graph, these are the connections between the nodes
-# START -> first node -> second nodes -> END
-workflow.add_edge(START, "generate_query_or_respond")
-workflow.add_edge("generate_query_or_respond", "respond")
-workflow.add_edge("respond", END)
-
-# What happens here?: We check if the LLM executed a tool call
-# If it did, we go to the retrieve node -> Retrieve new information
-# If it didn't, we go to the END node -> Output the final answer
+# 5. Add edges
 workflow.add_conditional_edges(
-    "generate_query_or_respond",
-    # Assess LLM decision (call `retriever_tool` tool or respond to the user)
-    tools_condition,
+    START,
+    should_use_tools,
     {
-        # Translate the condition outputs to nodes in our graph
-        "tools": "retrieve",
-        END: END,
-    },
+        # If tools are returned, use the tools node
+        "tools": "retrive_dfki_projects",
+        # Otherwise, go straight to generate
+        "default": "generate"
+    }
 )
 
-# Which edge is still missing?
+workflow.add_edge("retrive_dfki_projects", "generate")
+workflow.add_edge("generate", END)
 
-# In the end we compile the graph and then we can run it!
+# 6. Compile the graph
 graph = workflow.compile()
+graph.get_graph().draw_mermaid_png(
+    output_file_path="agent_graph.png"
+)
 
+print("Finished building graph")
 
-# Run the graph
-output = graph.invoke({"messages": [{"role": "user", "content": "When was Albert Einstein born?"}]}) # Answer without retrieval
-print(output)
-output = graph.invoke({"messages": [{"role": "user", "content": "How does the DFKI project UPQuantVal work?"}]}) # Answer with retrieval
-print(output)
+#################
+# Test examples #
+#################
+
+output = graph.invoke({"messages": [{"role": "user", "content": "When was Albert Einstein born?"}]})
+print(output['messages'][-1].content)
+
+output = graph.invoke({"messages": [{"role": "user", "content": "Tell me about DFKI project UPQuantVal"}]})
+print(output['messages'][-1].content)
