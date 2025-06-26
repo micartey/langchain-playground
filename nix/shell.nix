@@ -16,14 +16,25 @@ pkgs.mkShell rec {
     python312
     python312Packages.pip
     python312Packages.numpy
+    python312Packages.langgraph
     python312Packages.langchain
     python312Packages.langchain-ollama
     python312Packages.langchain-chroma
     python312Packages.langchain-community
     python312Packages.tqdm
     python312Packages.unstructured
+    python312Packages.tiktoken
 
     langchain-experimental
+
+    # For visualization
+    python312Packages.sklearn-compat
+    python312Packages.scikit-learn
+    python312Packages.umap-learn
+    python312Packages.plotly
+    python312Packages.pandas
+    python312Packages.chromadb
+    python312Packages.matplotlib
   ];
 
   shellHook = ''

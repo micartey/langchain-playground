@@ -28,7 +28,8 @@ docsearch = Chroma(
 # So that means the database doesn't increase in size every run anymore.
 # However: Using the source might be unique to the DirectoryLoader, other loaders might have other metadata
 for doc in texts:
-    doc.id = doc.metadata['source']
+    print(doc)
+    doc.id = doc.metadata['source'] + doc.page_content[:5]
 
 docsearch.add_documents(texts) # <-- Comment this out to use only already stored data
 
