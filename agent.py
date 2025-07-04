@@ -65,7 +65,7 @@ def should_use_tools(state):
     # Check if we need to retrieve information from the DFKI projects
     if "DFKI" in content or "project" in content:
         print("Will use retrieval tool")
-        return "tools"
+        return "retrive"
 
     print("No retrieval needed, responding directly")
     return "default"
@@ -111,7 +111,7 @@ workflow.add_conditional_edges(
     should_use_tools,
     {
         # If tools are returned, use the tools node
-        "tools": "retrive_dfki_projects",
+        "retrive": "retrive_dfki_projects",
         # Otherwise, go straight to generate
         "default": "generate"
     }
@@ -122,9 +122,8 @@ workflow.add_edge("generate", END)
 
 # 6. Compile the graph
 graph = workflow.compile()
-graph.get_graph().draw_mermaid_png(
-    output_file_path="agent_graph.png"
-)
+with open('agent_graph.md', 'w') as file:
+    file.write(graph.get_graph().draw_mermaid())
 
 print("Finished building graph")
 
