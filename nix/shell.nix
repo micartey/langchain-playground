@@ -25,6 +25,11 @@ pkgs.mkShell rec {
     python312Packages.unstructured
     python312Packages.tiktoken
 
+    python312Packages.torch
+    python312Packages.datasets
+    python312Packages.transformers
+    python312Packages.evaluate
+
     langchain-experimental
 
     # For visualization
