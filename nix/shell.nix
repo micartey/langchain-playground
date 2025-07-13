@@ -7,6 +7,11 @@ let
     python = pkgs.python312;
     pkgs = pkgs;
   };
+
+  deepeval = pkgs.callPackage ../pypi/deepeval.nix {
+    python = pkgs.python312;
+    pkgs = pkgs;
+  };
 in
 pkgs.mkShell rec {
   buildInputs = with pkgs; [
@@ -31,6 +36,7 @@ pkgs.mkShell rec {
     python312Packages.evaluate
 
     langchain-experimental
+    deepeval
 
     # For visualization
     python312Packages.sklearn-compat
