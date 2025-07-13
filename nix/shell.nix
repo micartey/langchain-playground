@@ -38,6 +38,10 @@ pkgs.mkShell rec {
     langchain-experimental
     deepeval
 
+    python312Packages.sentence-transformers
+    python312Packages.scikit-learn
+    python312Packages.torch
+
     # For visualization
     python312Packages.sklearn-compat
     python312Packages.scikit-learn
