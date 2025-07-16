@@ -1,5 +1,8 @@
 index:
-    python index.py
+    python src/rag/index.py
 
 rag query:
-    python rag.py "{{query}}"
+    python src/rag/rag.py "{{query}}"
+
+visualize:
+    python src/visualize.py

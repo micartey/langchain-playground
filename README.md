@@ -1,16 +1,17 @@
-# langchain rag playground
+# langchain playground
 
-A simple rag example in langchain using:
+A simple langchain example collection using:
 
 - `ollama` as api to use llm modes
 - `chroma` for storing vector embeddings
-- `DirectoryLoader` load txt files from sub-directory
+- `DirectoryLoader` load txt files from sub-directory from _/docs_
 - `SemanticChunker` to split texts into semantic chunks
 
 And the following ollama models:
 
 - `llama2`
 - `mxbai-embed-large`
+- `mistral`
 
 ## Getting started
 
@@ -21,14 +22,19 @@ Afterwards, you can simply execute:
 nix develop
 ```
 
-### Creating Embeddings
+### Synposis
 
-```shell
-just index
 ```
-
-### Query Content
-
-```shell
-just rag "Some prompt to the llm"
+├── docs
+│   └── example text files
+├── src
+│   ├── agent
+│   │   └── tool calling, conditional rag
+│   ├── evaluation
+│   │   └── deepeval, cosine simularity
+│   └── rag
+│   │   └── storing data to vector db, rag example
+│   └── visualize.py
+├── pypi
+│   └── custom packages
 ```
