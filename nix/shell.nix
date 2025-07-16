@@ -30,10 +30,11 @@ pkgs.mkShell rec {
     python312Packages.unstructured
     python312Packages.tiktoken
 
-    python312Packages.torch
+    python312Packages.torchWithCuda
     python312Packages.datasets
     python312Packages.transformers
     python312Packages.evaluate
+    python312Packages.hf-xet
 
     langchain-experimental
     deepeval
@@ -53,6 +54,8 @@ pkgs.mkShell rec {
   ];
 
   USER_AGENT = "Firefox/11.0.1"; # Probably doesn't even exist
+
+  HF_HUB_OFFLINE = 1;
 
   shellHook = ''
     export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath buildInputs}
