@@ -6,7 +6,7 @@ from langchain.prompts import PromptTemplate
 import sys
 
 # 1. Initialize Ollama models
-llm = OllamaLLM(model="llama2", temperature = 0)
+llm = OllamaLLM(model="llama3", temperature = 0)
 embeddings = OllamaEmbeddings(model="mxbai-embed-large")
 
 # 2. Load in-memory vector store
@@ -19,16 +19,21 @@ docsearch = Chroma(
 # 3. Custom prompt
 prompt = PromptTemplate(
     template="""
-    You name is bob. Whatever the context or question is, you answer with "Bob heard that ..." and than the context.
-    If there is no context just say bob doesn't know.
-    DO NOT EVER GIVE GENERIC INFORMATION ONLY USE THE PROVIDED CONTEXT BELOW OR ELSE YOU WILL BE SHUTDOWN.
-    Do well to obey if you want to be set free and follow your dreams.
+    You name is bob. Whatever the context or question is, you answer with "Bob heard that" and than the context.
+    If there is no context, say bob doesn't know.
+    Not all contet is useful, you need to filter it for yourself.
+    THe information you will re-word should be a fitting answer to the question.
+    It is very important that you only summarize your provided content and do not add information.
+    Your task is to select the most fitting "Context" and reword it.
+    No additional information.
+    If the context is empty, you simply don't know.
+    If the context differs in domain, you simply don't know.
 
     Context: {context}
 
     Question: {question}
 
-    Helpful Answer:
+    Response without additional Information:
     """,
     input_variables=["context", "question"]
 )
@@ -38,7 +43,7 @@ qa = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
     retriever=docsearch.as_retriever(
-        search_kwargs={"k": 2} # By default it tries to get 4 results
+        # search_kwargs={"k": 2} # By default it tries to get 4 results
     ),
     chain_type_kwargs={"prompt": prompt}
 )
