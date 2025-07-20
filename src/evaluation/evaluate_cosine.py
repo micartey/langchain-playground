@@ -5,7 +5,7 @@ import os
 # Load a pre-trained model
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-rag_output = os.popen('python rag.py "What can you tell me about france?"').read()
+rag_output = os.popen('just rag "What can you tell me about france?"').read()
 
 # Sentences to compare
 sentences = [

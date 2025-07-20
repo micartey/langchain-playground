@@ -8,7 +8,7 @@ import os
 # os.environ["OLLAMA_HOST"] = "http://localhost:11434" # Optional: if not default
 
 # 1. Get the LLM output
-rag_output = os.popen('python rag.py "What can you tell me about france?"').read()
+rag_output = os.popen('just rag "What can you tell me about france?"').read()
 
 # 2. Create your test case
 # This is an input <---> output object

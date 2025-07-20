@@ -61,8 +61,8 @@ pkgs.mkShell rec {
     python312Packages.transformers
     python312Packages.trl
     python312Packages.peft
-
-    # python312Packages.unsloth
+    python312Packages.unsloth
+    python312Packages.unsloth-zoo
   ];
 
   USER_AGENT = "Firefox/11.0.1"; # Probably doesn't even exist
@@ -74,6 +74,5 @@ pkgs.mkShell rec {
 
     python -m venv .venv
     source ./.venv/bin/activate; pip install bitsandbytes unsloth_zoo
-    pip install --no-deps unsloth
   '';
 }
