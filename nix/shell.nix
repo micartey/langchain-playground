@@ -17,6 +17,10 @@ pkgs.mkShell rec {
   buildInputs = with pkgs; [
     gcc
     just
+    cmake
+    curl
+    cudaPackages.cudatoolkit
+    cudaPackages.cudnn
 
     python312
     python312Packages.pip
@@ -51,6 +55,14 @@ pkgs.mkShell rec {
     python312Packages.pandas
     python312Packages.chromadb
     python312Packages.matplotlib
+
+    # For finetuning
+    python312Packages.accelerate
+    python312Packages.transformers
+    python312Packages.trl
+    python312Packages.peft
+
+    # python312Packages.unsloth
   ];
 
   USER_AGENT = "Firefox/11.0.1"; # Probably doesn't even exist
@@ -59,5 +71,9 @@ pkgs.mkShell rec {
 
   shellHook = ''
     export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath buildInputs}
+
+    python -m venv .venv
+    source ./.venv/bin/activate; pip install bitsandbytes unsloth_zoo
+    pip install --no-deps unsloth
   '';
 }

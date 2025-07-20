@@ -2,3 +2,8 @@
 .chromadb
 .ropeproject
 .deepeval
+llama.cpp
+__pycache__
+results
+outputs
+*_cache
