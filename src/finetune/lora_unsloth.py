@@ -25,8 +25,7 @@ model = FastLanguageModel.get_peft_model(
                       "gate_proj", "up_proj", "down_proj",],
     lora_alpha = 16,
     lora_dropout = 0, # Supports any, but = 0 is optimized
-    bias = "none",    # Supports any, but = "none" is optimized
-    # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
+    bias = "none",    # Supports any, but = "none" is optimized!
     use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
     random_state = 3407,
     use_rslora = False,  # We support rank stabilized LoRA
@@ -62,7 +61,7 @@ trainer = SFTTrainer(
         gradient_accumulation_steps = 4,
         warmup_steps = 5,
         # num_train_epochs = 1, # Set this for 1 full training run.
-        max_steps = 1, # The amount of training steps (default recommended: 60)
+        max_steps = 60, # The amount of training steps (default recommended: 60)
         learning_rate = 2e-4,
         logging_steps = 1,
         optim = "adamw_8bit",
@@ -78,4 +77,4 @@ trainer_stats = trainer.train()
 
 # trainer.model.save_pretrained("new_model")
 
-model.save_pretrained_gguf("model", tokenizer, quantization_method = "f16")
+model.save_pretrained_gguf("model", tokenizer, maximum_memory_usage = 0.40)
