@@ -1,7 +1,7 @@
-from unsloth import FastLanguageModel
+from unsloth import FastLanguageModel, apply_chat_template
 from unsloth.chat_templates import get_chat_template, train_on_responses_only
 from datasets import load_dataset
-from unsloth.chat_templates import standardize_sharegpt
+from unsloth.chat_templates import to_sharegpt
 from trl import SFTConfig, SFTTrainer
 from transformers import DataCollatorForSeq2Seq
 import torch
@@ -32,21 +32,40 @@ model = FastLanguageModel.get_peft_model(
     loftq_config = None, # And LoftQ
 )
 
-
 tokenizer = get_chat_template(
     tokenizer,
     chat_template = "llama-3.1",
 )
 
 def formatting_prompts_func(examples):
-    convos = examples["conversations"]
-    texts = [tokenizer.apply_chat_template(convo, tokenize = False, add_generation_prompt = False) for convo in convos]
-    return { "text" : texts, }
+    convos = []
+    for instruction, input_text, output in zip(examples["instruction"], examples["input"], examples["output"]):
+        if input_text:
+            user_message = f"{instruction}\n\n{input_text}"
+        else:
+            user_message = instruction
 
-dataset = load_dataset("mlabonne/FineTome-100k", split = "train")
-dataset = standardize_sharegpt(dataset)
-dataset = dataset.map(formatting_prompts_func, batched = True,)
+        conversation = [
+            {"role": "user", "content": user_message},
+            {"role": "assistant", "content": output}
+        ]
+        convos.append(conversation)
+    return {"conversations": convos}
 
+
+dataset = load_dataset("vicgalle/alpaca-gpt4", split = "train")
+dataset = dataset.map(formatting_prompts_func, batched=True)
+
+dataset = apply_chat_template(
+    dataset,
+    tokenizer,
+)
+
+# Train only on responses to help with stopping
+# dataset = train_on_responses_only(
+#     tokenizer,
+#     dataset,
+# )
 
 trainer = SFTTrainer(
     model = model,
