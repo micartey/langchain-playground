@@ -6,8 +6,8 @@ from langchain.prompts import PromptTemplate
 import sys
 
 # 1. Initialize Ollama models
-llm = OllamaLLM(model="llama3", temperature = 0)
-embeddings = OllamaEmbeddings(model="mxbai-embed-large")
+llm = OllamaLLM(model="gpt-oss", temperature = 0)
+embeddings = OllamaEmbeddings(model="hf.co/Qwen/Qwen3-Embedding-4B-GGUF")
 
 # 2. Load in-memory vector store
 docsearch = Chroma(

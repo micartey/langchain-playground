@@ -56,23 +56,18 @@ pkgs.mkShell rec {
     python312Packages.chromadb
     python312Packages.matplotlib
 
-    # For finetuning
+    # For finetuning (Probably not needed anymore?)
     python312Packages.accelerate
     python312Packages.transformers
     python312Packages.trl
     python312Packages.peft
-    python312Packages.unsloth
-    python312Packages.unsloth-zoo
   ];
 
   USER_AGENT = "Firefox/11.0.1"; # Probably doesn't even exist
 
-  HF_HUB_OFFLINE = 1;
+  # HF_HUB_OFFLINE = 1;
 
   shellHook = ''
     export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath buildInputs}
-
-    python -m venv .venv
-    source ./.venv/bin/activate; pip install bitsandbytes unsloth_zoo
   '';
 }

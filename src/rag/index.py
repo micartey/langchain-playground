@@ -5,7 +5,7 @@ from langchain_chroma import Chroma
 
 # 1. Initialize Ollama models
 llm = OllamaLLM(model="llama2")
-embeddings = OllamaEmbeddings(model="mxbai-embed-large")
+embeddings = OllamaEmbeddings(model="hf.co/Qwen/Qwen3-Embedding-4B-GGUF")
 
 print("Reading files from directory and splitting...")
 
